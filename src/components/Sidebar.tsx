@@ -73,7 +73,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
               <ShoppingCart size={20} />
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg leading-tight">বাংলা স্টোর</h1>
+              <h1 className="text-white font-bold text-lg leading-tight">Probash Mart</h1>
               <p className="text-[10px] uppercase tracking-wider text-gray-400">Admin Panel</p>
             </div>
           </Link>
