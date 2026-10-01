@@ -118,7 +118,16 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
 
         {/* Logout */}
         <div className="p-4 shrink-0 mt-auto border-t border-gray-800">
-          <button className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-sm font-medium hover:text-white hover:bg-white/5 transition-all duration-200">
+          <button 
+            onClick={() => {
+              if(confirm('আপনি কি সত্যিই লগআউট করতে চান?')) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.reload();
+              }
+            }}
+            className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-sm font-medium hover:text-white hover:bg-white/5 transition-all duration-200"
+          >
             <LogOut size={18} className="text-[#76768e]" />
             লগআউট
           </button>

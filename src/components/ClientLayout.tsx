@@ -1,12 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import clsx from 'clsx';
+import { usePathname, useRouter } from 'next/navigation';
+
+function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('access_token');
+}
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const hasToken = !!getAccessToken();
+    if (!hasToken && pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [pathname, router]);
+
+  if (!mounted) return null;
+
+  // Don't show sidebar and header on login page
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
+  // Prevent rendering dashboard if not authenticated
+  if (!getAccessToken()) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-[#F3F4F6] font-sans overflow-hidden">

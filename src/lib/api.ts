@@ -22,8 +22,13 @@ export function setTokens(access: string, refresh: string) {
 }
 
 export function clearTokens() {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  }
 }
 
 export function isAuthenticated(): boolean {
@@ -36,7 +41,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refresh) return null;
 
   try {
-    const res = await fetch(`${API_V1}/auth/token/refresh/`, {
+    const res = await fetch(`${API_V1}/auth/token/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh }),
@@ -63,6 +68,10 @@ async function apiFetch<T = any>(
   options: FetchOptions = {}
 ): Promise<T> {
   const { requireAuth = true, headers: customHeaders, ...rest } = options;
+
+  // Strip trailing slash before query parameters to avoid Next.js 308 redirect 
+  // (which can drop Authorization headers on POST requests).
+  endpoint = endpoint.replace(/\/(\?|$)/, '$1');
 
   const headers: Record<string, string> = {
     ...(customHeaders as Record<string, string>),
