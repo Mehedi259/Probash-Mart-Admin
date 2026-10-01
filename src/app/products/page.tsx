@@ -63,6 +63,7 @@ export default function ProductsPage() {
   const [stock, setStock] = useState('0');
   const [weight, setWeight] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const openModal = (item?: any) => {
     if (item) {
@@ -73,6 +74,7 @@ export default function ProductsPage() {
       setStock(item.stock?.toString() || '0');
       setWeight(item.weight || '');
       setIsActive(item.is_active !== undefined ? item.is_active : true);
+      setImageFile(null);
     } else {
       setEditingItem(null);
       setName('');
@@ -81,6 +83,7 @@ export default function ProductsPage() {
       setStock('0');
       setWeight('');
       setIsActive(true);
+      setImageFile(null);
     }
     setIsModalOpen(true);
   };
@@ -94,20 +97,22 @@ export default function ProductsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const payload = { 
-      name, 
-      category: categoryId, 
-      price, 
-      stock: parseInt(stock), 
-      weight, 
-      is_active: isActive 
-    };
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('category', categoryId);
+    formData.append('price', price);
+    formData.append('stock', stock);
+    formData.append('weight', weight);
+    formData.append('is_active', isActive.toString());
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
     
     try {
       if (editingItem) {
-        await productsAPI.update(editingItem.id, payload);
+        await productsAPI.update(editingItem.id, formData as any);
       } else {
-        await productsAPI.create(payload);
+        await productsAPI.create(formData as any);
       }
       closeModal();
       refetch();
@@ -175,6 +180,24 @@ export default function ProductsPage() {
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">প্রোডাক্টের ছবি</label>
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setImageFile(e.target.files[0]);
+                }
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+            {editingItem?.image && !imageFile && (
+              <div className="mt-2 text-sm text-gray-500">
+                বর্তমান ছবি: <a href={editingItem.image} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">দেখুন</a>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -9,8 +9,20 @@ import { useApi } from '@/hooks/useApi';
 import { Loader2 } from 'lucide-react';
 
 const columns = [
+  { 
+    key: 'image', 
+    label: 'ছবি', 
+    render: (val: string, item: any) => (
+      val ? (
+        <img src={val} alt={item.name} className="w-10 h-10 rounded object-cover border border-gray-200" />
+      ) : (
+        <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 border border-gray-200">
+          ছবি নেই
+        </div>
+      )
+    ) 
+  },
   { key: 'name', label: 'ক্যাটাগরির নাম', render: (val: string) => <span className="font-bold text-gray-800">{val}</span> },
-  { key: 'icon', label: 'আইকন', render: (val: string) => <span className="text-gray-500">{val || '-'}</span> },
   { key: 'product_count', label: 'মোট প্রোডাক্ট' },
   { key: 'sort_order', label: 'সর্ট অর্ডার' },
   { 
@@ -34,19 +46,19 @@ export default function CategoriesPage() {
 
   // Form State
   const [name, setName] = useState('');
-  const [icon, setIcon] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isActive, setIsActive] = useState(true);
 
   const openModal = (item?: any) => {
     if (item) {
       setEditingItem(item);
       setName(item.name || '');
-      setIcon(item.icon || '');
+      setImageFile(null); // Keep null unless new image is selected
       setIsActive(item.is_active !== undefined ? item.is_active : true);
     } else {
       setEditingItem(null);
       setName('');
-      setIcon('');
+      setImageFile(null);
       setIsActive(true);
     }
     setIsModalOpen(true);
@@ -61,13 +73,18 @@ export default function CategoriesPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const payload = { name, icon, is_active: isActive };
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('is_active', isActive.toString());
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
     
     try {
       if (editingItem) {
-        await categoriesAPI.update(editingItem.id, payload);
+        await categoriesAPI.update(editingItem.id, formData as any);
       } else {
-        await categoriesAPI.create(payload);
+        await categoriesAPI.create(formData as any);
       }
       closeModal();
       refetch();
@@ -123,14 +140,22 @@ export default function CategoriesPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">আইকন</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ক্যাটাগরির ছবি</label>
             <input 
-              type="text" 
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="আইকন নাম বা ইউআরএল"
+              type="file" 
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setImageFile(e.target.files[0]);
+                }
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
             />
+            {editingItem?.image && !imageFile && (
+              <div className="mt-2 text-sm text-gray-500">
+                বর্তমান ছবি: <a href={editingItem.image} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">দেখুন</a>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <input 

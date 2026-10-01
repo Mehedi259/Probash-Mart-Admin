@@ -107,7 +107,9 @@ async function apiFetch<T = any>(
     throw new Error(error.detail || error.message || JSON.stringify(error));
   }
 
-  return res.json();
+  const text = await res.text();
+  const replacedText = text.replace(new RegExp('http://46.225.103.236:8003', 'g'), '');
+  return JSON.parse(replacedText) as T;
 }
 
 // ─── Public API Methods ────────────────────────────────────────────────────
@@ -147,9 +149,9 @@ export const productsAPI = {
   list: (params?: string) => apiFetch(`/products/admin/list/${params ? `?${params}` : ''}`),
   get: (id: string) => apiFetch(`/products/admin/${id}/`),
   create: (data: any) =>
-    apiFetch('/products/admin/list/', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/products/admin/list/', { method: 'POST', body: data instanceof FormData ? data : JSON.stringify(data) }),
   update: (id: string, data: any) =>
-    apiFetch(`/products/admin/${id}/`, { method: 'PUT', body: JSON.stringify(data) }),
+    apiFetch(`/products/admin/${id}/`, { method: 'PUT', body: data instanceof FormData ? data : JSON.stringify(data) }),
   delete: (id: string) =>
     apiFetch(`/products/admin/${id}/`, { method: 'DELETE' }),
   uploadImage: (productId: string, formData: FormData) =>
@@ -162,9 +164,9 @@ export const categoriesAPI = {
   adminList: (params?: string) => apiFetch(`/categories/admin/list/${params ? `?${params}` : ''}`),
   get: (id: string) => apiFetch(`/categories/admin/${id}/`),
   create: (data: any) =>
-    apiFetch('/categories/admin/list/', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/categories/admin/list/', { method: 'POST', body: data instanceof FormData ? data : JSON.stringify(data) }),
   update: (id: string, data: any) =>
-    apiFetch(`/categories/admin/${id}/`, { method: 'PUT', body: JSON.stringify(data) }),
+    apiFetch(`/categories/admin/${id}/`, { method: 'PUT', body: data instanceof FormData ? data : JSON.stringify(data) }),
   delete: (id: string) =>
     apiFetch(`/categories/admin/${id}/`, { method: 'DELETE' }),
 };

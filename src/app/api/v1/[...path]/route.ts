@@ -28,6 +28,23 @@ async function proxyRequest(req: NextRequest, { params }: { params: any }) {
     const responseHeaders = new Headers(res.headers);
     responseHeaders.delete('content-encoding');
 
+    // If it's a JSON response, replace absolute backend URLs with relative ones
+    const contentType = responseHeaders.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const text = await res.text();
+      // Use regex to replace the absolute URL globally
+      const replacedText = text.replace(new RegExp(API_BASE_URL, 'g'), '');
+      
+      // Update content-length if present, or just delete it so Next.js recalculates
+      responseHeaders.delete('content-length');
+      
+      return new Response(replacedText, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: responseHeaders,
+      });
+    }
+
     return new Response(res.body, {
       status: res.status,
       statusText: res.statusText,
