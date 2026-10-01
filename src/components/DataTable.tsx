@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Filter, MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import clsx from 'clsx';
 
 interface Column {
   key: string;
@@ -21,10 +20,21 @@ interface DataTableProps {
 export default function DataTable({ 
   columns, 
   data, 
-  searchPlaceholder = "Search...",
+  searchPlaceholder = "খুঁজুন...",
   onEdit,
   onDelete
 }: DataTableProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredData = data.filter(item => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    // basic search matching against all values
+    return Object.values(item).some(val => 
+      val && val.toString().toLowerCase().includes(term)
+    );
+  });
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Table Toolbar */}
@@ -34,11 +44,13 @@ export default function DataTable({
           <input 
             type="text" 
             placeholder={searchPlaceholder}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
           />
         </div>
         <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-          <Filter size={16} /> Filters
+          <Filter size={16} /> ফিল্টার
         </button>
       </div>
 
@@ -51,19 +63,19 @@ export default function DataTable({
                 <th key={idx} className="px-6 py-4 font-medium">{col.label}</th>
               ))}
               {(onEdit || onDelete) && (
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th className="px-6 py-4 font-medium text-right">অ্যাকশন</th>
               )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.length === 0 ? (
+            {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-gray-500">
-                  No data available.
+                  কোনো তথ্য পাওয়া যায়নি।
                 </td>
               </tr>
             ) : (
-              data.map((item, rowIndex) => (
+              filteredData.map((item, rowIndex) => (
                 <tr key={rowIndex} className="hover:bg-gray-50/50 transition-colors">
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="px-6 py-4">
@@ -74,18 +86,15 @@ export default function DataTable({
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {onEdit && (
-                          <button onClick={() => onEdit(item)} className="p-1.5 text-gray-400 hover:text-[#4F46E5] rounded-md hover:bg-indigo-50 transition-colors">
+                          <button onClick={() => onEdit(item)} className="p-1.5 text-gray-400 hover:text-[#4F46E5] rounded-md hover:bg-indigo-50 transition-colors" title="সম্পাদনা">
                             <Edit2 size={16} />
                           </button>
                         )}
                         {onDelete && (
-                          <button onClick={() => onDelete(item)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors">
+                          <button onClick={() => onDelete(item)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors" title="মুছে ফেলুন">
                             <Trash2 size={16} />
                           </button>
                         )}
-                        <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                          <MoreVertical size={16} />
-                        </button>
                       </div>
                     </td>
                   )}
@@ -97,15 +106,13 @@ export default function DataTable({
       </div>
 
       {/* Pagination */}
-      {data.length > 0 && (
+      {filteredData.length > 0 && (
         <div className="p-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-          <div>Showing 1 to {data.length} of {data.length} entries</div>
+          <div>মোট {filteredData.length} টির মধ্যে ১ থেকে {filteredData.length} টি দেখানো হচ্ছে</div>
           <div className="flex gap-1">
-            <button className="px-3 py-1 border border-gray-200 rounded text-gray-400 cursor-not-allowed">Previous</button>
-            <button className="px-3 py-1 bg-[#4F46E5] text-white rounded">1</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">2</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">3</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">Next</button>
+            <button className="px-3 py-1 border border-gray-200 rounded text-gray-400 cursor-not-allowed">পূর্ববর্তী</button>
+            <button className="px-3 py-1 bg-[#4F46E5] text-white rounded">১</button>
+            <button className="px-3 py-1 border border-gray-200 rounded text-gray-400 cursor-not-allowed">পরবর্তী</button>
           </div>
         </div>
       )}

@@ -10,7 +10,7 @@ interface PageHeaderProps {
   addLabel?: string;
 }
 
-export default function PageHeader({ title, description, onAdd, addLabel = 'Add New' }: PageHeaderProps) {
+export default function PageHeader({ title, description, onAdd, addLabel = 'নতুন যুক্ত করুন' }: PageHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>

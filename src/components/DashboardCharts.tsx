@@ -17,11 +17,11 @@ const salesData = [
 ];
 
 const statusData = [
-  { name: 'Delivered', value: 1245, color: '#10B981' },
-  { name: 'Processing', value: 456, color: '#F59E0B' },
-  { name: 'Shipped', value: 356, color: '#3B82F6' },
-  { name: 'Cancelled', value: 210, color: '#EF4444' },
-  { name: 'Pending', value: 186, color: '#8B5CF6' },
+  { name: 'ডেলিভার্ড', value: 1245, color: '#10B981' },
+  { name: 'প্রসেসিং', value: 456, color: '#F59E0B' },
+  { name: 'শিপড', value: 356, color: '#3B82F6' },
+  { name: 'বাতিল', value: 210, color: '#EF4444' },
+  { name: 'পেন্ডিং', value: 186, color: '#8B5CF6' },
 ];
 
 export function SalesChart() {
@@ -55,6 +55,7 @@ export function SalesChart() {
           <Line 
             type="monotone" 
             dataKey="revenue" 
+            name="রেভিনিউ"
             stroke="#4F46E5" 
             strokeWidth={2} 
             dot={false}
@@ -63,6 +64,7 @@ export function SalesChart() {
           <Line 
             type="monotone" 
             dataKey="orders" 
+            name="অর্ডার"
             stroke="#3B82F6" 
             strokeWidth={2} 
             dot={false} 
@@ -93,14 +95,14 @@ export function StatusChart() {
             ))}
           </Pie>
           <RechartsTooltip 
-            formatter={(value) => `${value} Orders`}
+            formatter={(value) => `${value} টি অর্ডার`}
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
           />
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
         <span className="text-2xl font-bold text-gray-800">2,453</span>
-        <span className="text-xs text-gray-500">Total Orders</span>
+        <span className="text-xs text-gray-500">মোট অর্ডার</span>
       </div>
     </div>
   );

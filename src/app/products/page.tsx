@@ -1,48 +1,243 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
-
-const mockProducts = [
-  { id: 1, img: 'https://placehold.co/40x40/F3F4F6/9CA3AF?text=P1', name: 'ঐতিহ্যবাহী জামদানি শাড়ি', category: 'Clothing', price: '৳ 8,000', stock: 45, status: 'Active' },
-  { id: 2, img: 'https://placehold.co/40x40/F3F4F6/9CA3AF?text=P2', name: 'কটন পাঞ্জাবি', category: 'Clothing', price: '৳ 1,500', stock: 120, status: 'Active' },
-  { id: 3, img: 'https://placehold.co/40x40/F3F4F6/9CA3AF?text=P3', name: 'নকশী কাঁথা (ডাবল)', category: 'Home Decor', price: '৳ 2,500', stock: 15, status: 'Low Stock' },
-  { id: 4, img: 'https://placehold.co/40x40/F3F4F6/9CA3AF?text=P4', name: 'মাটির হাঁড়ি সেট', category: 'Kitchen', price: '৳ 800', stock: 0, status: 'Out of Stock' },
-];
+import Modal from '@/components/Modal';
+import { productsAPI, categoriesAPI } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
+import { Loader2 } from 'lucide-react';
 
 const columns = [
   { 
     key: 'name', 
-    label: 'Product', 
+    label: 'প্রোডাক্ট', 
     render: (val: string, item: any) => (
       <div className="flex items-center gap-3">
-        <img src={item.img} className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt={val} />
-        <span className="font-medium text-gray-800">{val}</span>
+        {item.image ? (
+          <img src={item.image} className="w-10 h-10 rounded-lg object-cover border border-gray-100" alt={val} />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400">ছবি নেই</div>
+        )}
+        <div>
+          <span className="font-medium text-gray-800">{val}</span>
+          <div className="text-xs text-gray-400">{item.weight || '-'}</div>
+        </div>
       </div>
     ) 
   },
-  { key: 'category', label: 'Category', render: (val: string) => <span className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">{val}</span> },
-  { key: 'price', label: 'Price', render: (val: string) => <span className="font-bold text-gray-800">{val}</span> },
-  { key: 'stock', label: 'Stock' },
+  { key: 'category_name', label: 'ক্যাটাগরি', render: (val: string) => <span className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">{val || '-'}</span> },
+  { key: 'price', label: 'দাম', render: (val: string) => <span className="font-bold text-gray-800">€ {Number(val).toFixed(2)}</span> },
+  { key: 'stock', label: 'স্টক' },
   { 
-    key: 'status', 
-    label: 'Status', 
+    key: 'stock_status', 
+    label: 'স্ট্যাটাস', 
     render: (val: string) => {
       let color = 'bg-gray-100 text-gray-700';
-      if(val === 'Active') color = 'bg-emerald-100 text-emerald-700';
-      else if(val === 'Low Stock') color = 'bg-amber-100 text-amber-700';
-      else if(val === 'Out of Stock') color = 'bg-red-100 text-red-700';
-      return <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${color}`}>{val}</span>;
+      let text = val;
+      if(val === 'Active') { color = 'bg-emerald-100 text-emerald-700'; text = 'সক্রিয়'; }
+      else if(val === 'Low Stock') { color = 'bg-amber-100 text-amber-700'; text = 'স্টক কম'; }
+      else if(val === 'Out of Stock') { color = 'bg-red-100 text-red-700'; text = 'স্টক আউট'; }
+      return <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${color}`}>{text}</span>;
     } 
   },
 ];
 
 export default function ProductsPage() {
+  const { data, loading, refetch } = useApi(() => productsAPI.list());
+  const products = data?.results || data || [];
+  
+  const [categories, setCategories] = useState<any[]>([]);
+  useEffect(() => {
+    categoriesAPI.list().then(res => setCategories(Array.isArray(res) ? res : res.results || []));
+  }, []);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form State
+  const [name, setName] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('0');
+  const [weight, setWeight] = useState('');
+  const [isActive, setIsActive] = useState(true);
+
+  const openModal = (item?: any) => {
+    if (item) {
+      setEditingItem(item);
+      setName(item.name || '');
+      setCategoryId(item.category || item.category_id || '');
+      setPrice(item.price || '');
+      setStock(item.stock?.toString() || '0');
+      setWeight(item.weight || '');
+      setIsActive(item.is_active !== undefined ? item.is_active : true);
+    } else {
+      setEditingItem(null);
+      setName('');
+      setCategoryId('');
+      setPrice('');
+      setStock('0');
+      setWeight('');
+      setIsActive(true);
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const payload = { 
+      name, 
+      category: categoryId, 
+      price, 
+      stock: parseInt(stock), 
+      weight, 
+      is_active: isActive 
+    };
+    
+    try {
+      if (editingItem) {
+        await productsAPI.update(editingItem.id, payload);
+      } else {
+        await productsAPI.create(payload);
+      }
+      closeModal();
+      refetch();
+    } catch (error) {
+      console.error("Error saving product", error);
+      alert('একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (item: any) => {
+    if (!confirm(`আপনি কি সত্যিই "${item.name}" প্রোডাক্টটি মুছে ফেলতে চান?`)) return;
+    await productsAPI.delete(item.id);
+    refetch();
+  };
+
   return (
     <div>
-      <PageHeader title="Products" description="Manage your store's inventory and products." onAdd={() => alert('Add product')} addLabel="Add Product" />
-      <DataTable columns={columns} data={mockProducts} searchPlaceholder="Search products..." onEdit={() => {}} onDelete={() => {}} />
+      <PageHeader 
+        title="প্রোডাক্টস" 
+        description="আপনার স্টোরের প্রোডাক্ট ও ইনভেন্টরি ম্যানেজ করুন।" 
+        onAdd={() => openModal()} 
+        addLabel="নতুন প্রোডাক্ট" 
+      />
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
+      ) : (
+        <DataTable 
+          columns={columns} 
+          data={products} 
+          searchPlaceholder="প্রোডাক্ট খুঁজুন..." 
+          onEdit={openModal} 
+          onDelete={handleDelete} 
+        />
+      )}
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        title={editingItem ? 'প্রোডাক্ট আপডেট করুন' : 'নতুন প্রোডাক্ট যোগ করুন'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">প্রোডাক্টের নাম *</label>
+            <input 
+              type="text" 
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="যেমন: Fresh Hilsa Fish"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ক্যাটাগরি *</label>
+            <select
+              required
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">ক্যাটাগরি নির্বাচন করুন</option>
+              {categories.map((cat: any) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">দাম (€) *</label>
+              <input 
+                type="number"
+                step="0.01"
+                required
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">স্টক *</label>
+              <input 
+                type="number" 
+                required
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ওজন / পরিমাণ</label>
+            <input 
+              type="text" 
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="যেমন: 1 KG"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="isActiveProd" 
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isActiveProd" className="text-sm font-medium text-gray-700">সক্রিয় রাখুন</label>
+          </div>
+          <div className="pt-4 flex justify-end gap-3">
+            <button 
+              type="button" 
+              onClick={closeModal}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              বাতিল
+            </button>
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+              {editingItem ? 'আপডেট করুন' : 'যোগ করুন'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: () => void })
           <Search size={18} className="absolute left-3 text-gray-400" />
           <input 
             type="text" 
-            placeholder="Search orders, customers, products..."
+            placeholder="অর্ডার, কাস্টমার, প্রোডাক্ট খুঁজুন..."
             className="w-full pl-10 pr-12 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all"
           />
           <div className="absolute right-2 flex items-center gap-1">
@@ -32,17 +32,17 @@ export default function Header({ toggleSidebar }: { toggleSidebar: () => void })
           <Sun size={20} />
         </button>
         
-        <button className="text-gray-500 hover:text-gray-700 transition-colors relative">
+        <button className="text-gray-500 hover:text-gray-700 transition-colors relative" onClick={() => alert("কোনো নতুন নোটিফিকেশন নেই")}>
           <Bell size={20} />
           <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
-            12
+            ০
           </span>
         </button>
 
         <div className="flex items-center gap-3 pl-2 sm:pl-4 sm:border-l border-gray-200 cursor-pointer">
           <div className="hidden sm:block text-right">
-            <p className="text-sm font-bold text-gray-800 leading-tight">Admin</p>
-            <p className="text-[11px] text-gray-500">Super Admin</p>
+            <p className="text-sm font-bold text-gray-800 leading-tight">অ্যাডমিন</p>
+            <p className="text-[11px] text-gray-500">সুপার অ্যাডমিন</p>
           </div>
           <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-200">
             <img src="https://ui-avatars.com/api/?name=Admin&background=4F46E5&color=fff" alt="Admin" className="w-full h-full object-cover" />

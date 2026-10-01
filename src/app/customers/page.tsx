@@ -3,34 +3,38 @@
 import React from 'react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
-
-const mockCustomers = [
-  { id: 1, name: 'Taufiq Rahman', email: 'taufiq@example.com', orders: 12, spent: '৳ 24,500', joined: '12 Jan 2024' },
-  { id: 2, name: 'Nusrat Jahan', email: 'nusrat@example.com', orders: 8, spent: '৳ 15,200', joined: '04 Mar 2024' },
-  { id: 3, name: 'Imran Hossain', email: 'imran@example.com', orders: 3, spent: '৳ 5,400', joined: '22 May 2024' },
-];
+import { customersAPI } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
+import { Loader2 } from 'lucide-react';
 
 const columns = [
   { 
-    key: 'name', 
-    label: 'Customer', 
+    key: 'username', 
+    label: 'কাস্টমার', 
     render: (val: string, item: any) => (
       <div>
-        <div className="font-bold text-gray-800">{val}</div>
+        <div className="font-bold text-gray-800">{item.first_name && item.last_name ? `${item.first_name} ${item.last_name}` : val}</div>
         <div className="text-xs text-gray-500">{item.email}</div>
       </div>
     ) 
   },
-  { key: 'orders', label: 'Total Orders' },
-  { key: 'spent', label: 'Total Spent', render: (val: string) => <span className="font-medium">{val}</span> },
-  { key: 'joined', label: 'Joined Date' },
+  { key: 'email', label: 'ইমেইল' },
+  { key: 'phone', label: 'ফোন নম্বর', render: (val: string) => val || '-' },
+  { key: 'date_joined', label: 'যোগদানের তারিখ', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
 ];
 
 export default function CustomersPage() {
+  const { data, loading } = useApi(() => customersAPI.list());
+  const customers = data?.results || data || [];
+
   return (
     <div>
-      <PageHeader title="Customers" description="View and manage customer data." />
-      <DataTable columns={columns} data={mockCustomers} searchPlaceholder="Search by name or email..." onEdit={() => {}} />
+      <PageHeader title="কাস্টমারসমূহ" description="কাস্টমারদের ডেটা দেখুন ও ম্যানেজ করুন।" />
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
+      ) : (
+        <DataTable columns={columns} data={customers} searchPlaceholder="নাম বা ইমেইল দিয়ে খুঁজুন..." onEdit={() => {}} />
+      )}
     </div>
   );
 }

@@ -12,39 +12,39 @@ import clsx from 'clsx';
 
 const menuGroups = [
   {
-    title: 'MANAGE',
+    title: 'ম্যানেজ করুন',
     items: [
-      { name: 'Orders', icon: ShoppingCart, path: '/orders' },
-      { name: 'Products', icon: Package, path: '/products' },
-      { name: 'Categories', icon: Layers, path: '/categories' },
-      { name: 'Customers', icon: Users, path: '/customers' },
-      { name: 'Coupons', icon: Ticket, path: '/coupons' },
-      { name: 'Reviews', icon: Star, path: '/reviews' },
+      { name: 'অর্ডারসমূহ', icon: ShoppingCart, path: '/orders' },
+      { name: 'প্রোডাক্টস', icon: Package, path: '/products' },
+      { name: 'ক্যাটাগরি', icon: Layers, path: '/categories' },
+      { name: 'কাস্টমারস', icon: Users, path: '/customers' },
+      { name: 'কুপন', icon: Ticket, path: '/coupons' },
+      { name: 'রিভিউ', icon: Star, path: '/reviews' },
     ]
   },
   {
-    title: 'SALES',
+    title: 'সেলস ও রিপোর্ট',
     items: [
-      { name: 'Analytics', icon: BarChart2, path: '/analytics' },
-      { name: 'Reports', icon: FileText, path: '/reports' },
-      { name: 'Transactions', icon: CreditCard, path: '/transactions' },
+      { name: 'অ্যানালিটিক্স', icon: BarChart2, path: '/analytics' },
+      { name: 'রিপোর্টস', icon: FileText, path: '/reports' },
+      { name: 'লেনদেন', icon: CreditCard, path: '/transactions' },
     ]
   },
   {
-    title: 'CONTENT',
+    title: 'কন্টেন্ট',
     items: [
-      { name: 'Banners', icon: ImageIcon, path: '/banners' },
-      { name: 'Pages', icon: File, path: '/pages' },
-      { name: 'Blog', icon: Edit3, path: '/blog' },
+      { name: 'ব্যানার', icon: ImageIcon, path: '/banners' },
+      { name: 'পেইজসমূহ', icon: File, path: '/pages' },
+      { name: 'ব্লগ', icon: Edit3, path: '/blog' },
     ]
   },
   {
-    title: 'SETTINGS',
+    title: 'সেটিংস',
     items: [
-      { name: 'Store Settings', icon: Settings, path: '/settings/store' },
-      { name: 'Users & Roles', icon: UserCheck, path: '/settings/users' },
-      { name: 'Payment Methods', icon: Wallet, path: '/settings/payment' },
-      { name: 'Shipping Methods', icon: Truck, path: '/settings/shipping' },
+      { name: 'স্টোর সেটিংস', icon: Settings, path: '/settings/store' },
+      { name: 'ইউজার ও রোলস', icon: UserCheck, path: '/settings/users' },
+      { name: 'পেমেন্ট মেথড', icon: Wallet, path: '/settings/payment' },
+      { name: 'শিপিং মেথড', icon: Truck, path: '/settings/shipping' },
     ]
   }
 ];
@@ -74,7 +74,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
             </div>
             <div>
               <h1 className="text-white font-bold text-lg leading-tight">Probash Mart</h1>
-              <p className="text-[10px] uppercase tracking-wider text-gray-400">Admin Panel</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">অ্যাডমিন প্যানেল</p>
             </div>
           </Link>
         </div>
@@ -87,7 +87,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
             pathname === '/' ? "bg-[#4F46E5] text-white shadow-lg shadow-indigo-500/30" : "hover:text-white hover:bg-white/5"
           )}>
             <Home size={20} />
-            <span className="font-medium text-sm">Dashboard</span>
+            <span className="font-medium text-sm">ড্যাশবোর্ড</span>
           </Link>
 
           {menuGroups.map((group, idx) => (
@@ -120,10 +120,11 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
         <div className="p-4 shrink-0 mt-auto border-t border-gray-800">
           <button className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-sm font-medium hover:text-white hover:bg-white/5 transition-all duration-200">
             <LogOut size={18} className="text-[#76768e]" />
-            Logout
+            লগআউট
           </button>
         </div>
       </aside>
     </>
   );
 }
+

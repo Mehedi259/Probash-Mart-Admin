@@ -3,23 +3,19 @@
 import React from 'react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
-
-const mockPages = [
-  { id: 1, title: 'About Us', slug: '/about', status: 'Published', lastUpdated: '12 May 2025' },
-  { id: 2, title: 'Privacy Policy', slug: '/privacy', status: 'Published', lastUpdated: '10 Jan 2025' },
-  { id: 3, title: 'Terms & Conditions', slug: '/terms', status: 'Published', lastUpdated: '10 Jan 2025' },
-  { id: 4, title: 'Return Policy', slug: '/returns', status: 'Draft', lastUpdated: '16 Jun 2025' },
-];
+import { pagesAPI } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
+import { Loader2 } from 'lucide-react';
 
 const columns = [
   { key: 'title', label: 'Page Title', render: (val: string) => <span className="font-bold text-gray-800">{val}</span> },
-  { key: 'slug', label: 'URL Slug', render: (val: string) => <span className="text-[#4F46E5] underline">{val}</span> },
-  { key: 'lastUpdated', label: 'Last Updated' },
+  { key: 'slug', label: 'URL Slug', render: (val: string) => <span className="text-[#4F46E5] underline">/{val}</span> },
+  { key: 'updated_at', label: 'Last Updated', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
   { 
     key: 'status', 
     label: 'Status', 
     render: (val: string) => (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${val === 'Published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+      <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${val === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
         {val}
       </span>
     ) 
@@ -27,10 +23,23 @@ const columns = [
 ];
 
 export default function PagesPage() {
+  const { data, loading, refetch } = useApi(() => pagesAPI.list());
+  const pages = data?.results || data || [];
+
+  const handleDelete = async (item: any) => {
+    if (!confirm(`Delete "${item.title}"?`)) return;
+    await pagesAPI.delete(item.id);
+    refetch();
+  };
+
   return (
     <div>
-      <PageHeader title="Pages" description="Manage static content pages (About, Privacy, etc.)." onAdd={() => {}} addLabel="Create Page" />
-      <DataTable columns={columns} data={mockPages} searchPlaceholder="Search pages..." onEdit={() => {}} onDelete={() => {}} />
+      <PageHeader title="Pages" description="Manage static content pages (About, Privacy, etc.)." onAdd={() => alert('Create page modal coming soon')} addLabel="Create Page" />
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
+      ) : (
+        <DataTable columns={columns} data={pages} searchPlaceholder="Search pages..." onEdit={() => {}} onDelete={handleDelete} />
+      )}
     </div>
   );
 }
