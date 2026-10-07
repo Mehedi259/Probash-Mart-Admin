@@ -44,7 +44,7 @@ const columns = [
 ];
 
 export default function ProductsPage() {
-  const { data, loading, refetch } = useApi(() => productsAPI.list());
+  const { data, loading, refetch } = useApi(() => productsAPI.list('page_size=500'));
   const products = data?.results || data || [];
   
   const [categories, setCategories] = useState<any[]>([]);

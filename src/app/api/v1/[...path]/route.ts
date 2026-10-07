@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.225.103.236:8003';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function proxyRequest(req: NextRequest, { params }: { params: any }) {
   // Await params if it's a promise (Next.js 15+ behavior)
